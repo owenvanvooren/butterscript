@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>butterscript</title>
+    <link rel="icon" type="image/png" href="/butterscript-assets/favicon/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="/butterscript-assets/favicon/favicon.svg">
+    <link rel="shortcut icon" href="/butterscript-assets/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/butterscript-assets/favicon/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+    <!-- CodeMirror Theme - will be overridden by our custom styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/midnight.min.css">
+    <!-- CodeMirror Addon CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.css">
+    <link href="/butterscript-css/butterscript-styles.css" rel="stylesheet">
+    <link href="/butterscript-css/butterscript-codemirror.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="editor-container">
+        <div class="menu-bar">
+            <div class="branding">
+                <img src="butterscript-assets/butterscript-logo.svg" alt="butter">
+                <p class="title">butterscript</p>
+            </div>
+            <div class="menu-container">
+                <ul class="menu">
+                    <li class="menu-item">
+                        <span>File</span>
+                        <div class="submenu">
+                            <a href="#" onclick="loadExample()">Load Example <span class="shortcut">⌘E</span></a>
+                            <a href="#" data-action="exportHTML">Export as HTML <span class="shortcut">⌘⇧H</span></a>
+                            <a href="#" data-action="exportButterscript">Export as butterscript <span class="shortcut">⌘⇧S</span></a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <span>Edit</span>
+                        <div class="submenu">
+                            <a href="#" onclick="toggleFindPanel()">Find/Replace <span class="shortcut">⌘F</span></a>
+                            <a href="#" onclick="formatCode()">Format Code <span class="shortcut">⌘⇧F</span></a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <span>View</span>
+                        <div class="submenu">
+                            <a href="#" onclick="togglePreviewPanel()">Toggle Preview <span class="shortcut">⌘P</span></a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <span>Copy</span>
+                        <div class="submenu">
+                            <a href="#" onclick="copyButterscript()">Copy butterscript <span class="shortcut">⌘⇧B</span></a>
+                            <a href="#" onclick="copyHTML()">Copy HTML <span class="shortcut">⌘⇧C</span></a>
+                        </div>
+                    </li>
+                    <li class="menu-item">
+                        <span>Help</span>
+                        <div class="submenu">
+                            <a href="#" onclick="showAbout()">About butterscript</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="find-replace-panel" id="find-replace-panel">
+            <div class="find-replace-container">
+                <div class="find-container">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" id="find-input" placeholder="Find" />
+                    <span class="match-count" id="match-count">0/0</span>
+                </div>
+                <div class="replace-container">
+                    <span class="material-symbols-outlined replace-icon">find_replace</span>
+                    <input type="text" id="replace-input" placeholder="Replace" />
+                </div>
+            </div>
+            <div class="find-replace-buttons">
+                <button class="find-btn" id="prev-match" title="Previous match (⇧F3)">
+                    <span class="material-symbols-outlined">arrow_upward</span>
+                </button>
+                <button class="find-btn" id="next-match" title="Next match (F3)">
+                    <span class="material-symbols-outlined">arrow_downward</span>
+                </button>
+                <button class="find-btn" id="replace-btn" title="Replace">Replace</button>
+                <button class="find-btn" id="replace-all-btn" title="Replace all">Replace All</button>
+                <button class="find-btn close-btn" id="close-find" title="Close (Esc)">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="editor-panel">
+                <!-- Autocomplete container -->
+                <div id="autocomplete-container" class="autocomplete-container">
+                    <div class="autocomplete-list"></div>
+                </div>
+
+                <textarea id="butterscript-input" autocapitalize="off" autocorrect="off" placeholder="Start writing...
+
+heading1 [Welcome to butterscript]
+
+paragraph [
+A natural markup language for snippet[humans].bold with powerful snippet[text formatting].bold.italic.
+]
+
+paragraph [
+New modifiers: 
+snippet[strikethrough].strikethrough, 
+snippet[highlighted text].highlight, 
+snippet[custom color].textcolor(.blue), 
+snippet[custom highlight].highlight(.yellow),
+snippet[font styles].font(.serif)
+]
+
+list [
+Simple syntax
+Live preview
+Export to HTML
+Layered formatting like snippet[important note].bold.italic.highlight(.pink)
+]"></textarea>
+            </div>
+
+            <div class="preview-panel">
+                <div id="preview"></div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="line-count">Ready</span>
+            </div>
+            <div class="status-right">
+                <span class="keyboard-hint">⌘E: Example • ⌘⇧B: Copy butterscript • ⌘⇧C: Copy HTML • ⌘S: Export • ⌘F: Find/Replace • ⌘⇧F: Format Code • Tab: Accept suggestion • ↑↓: Navigate</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/mode/simple.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/closebrackets.min.js"></script>
+    <!-- CodeMirror Autocompletion Addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/css-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/xml-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/hint/html-hint.min.js"></script>
+    
+    <script src="butterscript-js/butterscript-parser.js"></script>
+    <script src="butterscript-js/butterscript-actions.js"></script>
+    <script src="butterscript-js/butterscript-codemirror.js"></script>
+</body>
+
+</html>
