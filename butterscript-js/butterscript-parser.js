@@ -959,6 +959,11 @@ function updatePreview() {
     const lines = butterscriptCode.split('\n').length;
     const chars = butterscriptCode.length;
     lineCount.textContent = `Lines: ${lines} • Characters: ${chars}`;
+    
+    // Reinitialize action handlers to ensure new buttons work
+    if (typeof butterActions !== 'undefined' && butterActions.reinitializeHandlers) {
+        butterActions.reinitializeHandlers();
+    }
 }
 
 function formatCode() {

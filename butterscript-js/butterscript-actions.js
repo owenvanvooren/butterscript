@@ -238,7 +238,12 @@ class ButterscriptActions {
         
         // Show an alert
         this.registerAction('alert', (_, params) => {
-            alert(params[0] || 'Alert');
+            const message = params[0] || 'Alert';
+            // Add toast notification before showing the alert to verify action is triggered
+            if (typeof showToast === 'function') {
+                showToast('Alert action triggered');
+            }
+            alert(message);
         });
         
         // Confirm action
@@ -276,6 +281,12 @@ const butterActions = new ButterscriptActions();
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = butterActions;
 }
+
+// Add a public method to reinitialize action handlers
+// This will be called after the preview is updated
+butterActions.reinitializeHandlers = function() {
+    this.initActionHandlers();
+};
 
 // Toggle preview panel visibility
 function togglePreviewPanel() {
@@ -359,6 +370,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const isPreviewHidden = localStorage.getItem('butterscript_preview_hidden') === 'true';
     if (isPreviewHidden) {
         document.querySelector('.editor-container').classList.add('preview-hidden');
+    }
+    
+    // Explicitly reinitialize action handlers to ensure they're attached
+    // This helps with dynamic content and ensures all handlers are properly set up
+    if (butterActions && typeof butterActions.reinitializeHandlers === 'function') {
+        setTimeout(() => butterActions.reinitializeHandlers(), 100);
     }
     
     // Initialize existing functionality
